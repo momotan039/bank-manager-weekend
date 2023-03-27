@@ -113,15 +113,11 @@ router.put("/withdraw/:id/:amount", async (req, res) => {
   if (!isValidUserResutl) {
     return;
   }
+
   const user = await collection.findOne({
     _id: new ObjectId(id),
   });
-  if (!user) {
-    res.status(400).send({
-      msg: "user not found!!",
-    });
-    return;
-  }
+  
   let { cash, credit } = user;
 
   // substraction process
@@ -153,5 +149,58 @@ router.put("/withdraw/:id/:amount", async (req, res) => {
     res.status(500).send({ msg: err.message });
   }
 });
+
+router.put('/transferring/:id/:target/:amount',async(req,res)=>{
+  const [id,target] = req.params;
+  let amount = parseInt(req.params.amount);
+  const collection = req.database.collection("users");
+  //check validation Sender
+  const isValidSenderResutl = await isValidUser(
+    collection,
+    res,
+    new ObjectId(id)
+  );
+  if (!isValidUserResutl) {
+    return;
+  }
+   //check validation Reciever 
+   const isValidRecieverResutl = await isValidUser(
+    collection,
+    res,
+    new ObjectId(target)
+  );
+  if (!isValidRecieverResutl) {
+    return;
+  }
+
+  const sender = await collection.findOne({
+    _id: new ObjectId(id),
+  });
+
+  const reciever=await collection.findOne({
+    _id:ne
+  })
+
+  let { cash, credit } = user;
+
+ // sub from sender
+ if (cash >= amount) {
+  cash -= amount;
+} else {
+  amount -= cash;
+  cash = 0;
+  if (credit >= amount) {
+    credit -= amount;
+  } else {
+    res.status(400).send({
+      msg: "Not enough funds in Sender Account!",
+    });
+    return;
+  }
+}
+//add to reciver
+reciever.cash+=amount
+res.send('transferring done successfully')
+})
 
 module.exports = router;
